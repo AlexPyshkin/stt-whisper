@@ -1,15 +1,23 @@
-# import ssl
-# ssl._create_default_https_context = ssl._create_unverified_context
 import whisper
 
-# Загружаем модель один раз при инициализации модуля
-model = whisper.load_model("base")  # или "tiny", "small"
+model = whisper.load_model("base")
 
-def transcribe_audio(audio_path: str, language: str = "ru") -> str:
-    """
-    Распознаёт текст из аудиофайла
-    :param file_path: путь к аудиофайлу
-    :return: распознанный текст
-    """
-    result = model.transcribe(audio_path, language=language)
+def transcribe_audio(
+    audio_path: str,
+    language: str = "ru",
+    temperature: float = 0.0,
+    beam_size: int = 5,
+    best_of: int = 5,
+    patience: float = 1.0,
+    fp16: bool = True
+) -> str:
+    result = model.transcribe(
+        audio_path,
+        language=language,
+        temperature=temperature,
+        beam_size=beam_size,
+        best_of=best_of,
+        patience=patience,
+        fp16=fp16
+    )
     return result["text"]

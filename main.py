@@ -17,7 +17,12 @@ def health_check():
 def transcribe(
     file_path: Optional[str] = Query(None, description="Путь до локального файла"),
     file_url: Optional[str] = Query(None, description="URL до аудиофайла"),
-    lang: str = Query("ru", description="Язык аудио для распознавания"),
+    lang: str = Query("ru"),
+    temperature: float = Query(0.0),
+    beam_size: int = Query(5),
+    best_of: int = Query(5),
+    patience: float = Query(1.0),
+    fp16: bool = Query(True),
     uploaded_file: Optional[UploadFile] = File(None)
 ):
     try:
@@ -44,9 +49,16 @@ def transcribe(
         else:
             raise HTTPException(status_code=400, detail="Нужен либо file_path, либо file_url, либо файл")
 
-        text = transcribe_audio(audio_path, language=lang)
+        text = transcribe_audio(
+            audio_path,
+            language=lang,
+            temperature=temperature,
+            beam_size=beam_size,
+            best_of=best_of,
+            patience=patience,
+            fp16=fp16
+        )
 
-        # удалим временный файл, если скачивали или загружали
         if file_url or uploaded_file:
             os.remove(audio_path)
 
