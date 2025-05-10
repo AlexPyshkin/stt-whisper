@@ -11,5 +11,5 @@ def transcribe_audio(audio_path: str, language: str = "ru") -> str:
     :param file_path: путь к аудиофайлу
     :return: распознанный текст
     """
-    result = model.transcribe(file_path)
+    result = model.transcribe(audio_path, language=language)
     return result["text"]
