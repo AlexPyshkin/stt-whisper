@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query
 import requests
 import os
+from utils import wrap_response
 from whisper_service import transcribe_audio
 from typing import Optional
 import shutil
@@ -62,7 +63,7 @@ def transcribe(
         if file_url or uploaded_file:
             os.remove(audio_path)
 
-        return {"text": text}
+        return wrap_response(text);
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

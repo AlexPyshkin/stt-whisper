@@ -1,0 +1,19 @@
+# docker/Dockerfile.base
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Обновляем pip, ставим system-зависимости для whisper
+RUN apt-get update && apt-get install -y \
+    git ffmpeg && \
+    pip install --upgrade pip
+
+# Устанавливаем только whisper
+RUN pip install --no-cache-dir git+https://github.com/openai/whisper.git
+
+# Базовый healthcheck чтобы быстрее билд проверять
+HEALTHCHECK CMD ["python", "-c", "print('ok')"]
+
+# Имя базового образа
+LABEL maintainer="alex"

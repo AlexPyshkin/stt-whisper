@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  app:
+    image: "spbiffi/whisper-api:latest"
+    container_name: "whisper-api"
+    restart: on-failure
+    ports:
+      - "9099:9099"
+    env_file:
+      - .env
+    volumes:
+      - /home/biffi/workspace/docker/volumes/whisper-api:/app/data  # если нужно монтировать папку с данными внутрь контейнера (можно убрать если не надо)
+
