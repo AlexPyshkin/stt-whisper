@@ -1,4 +1,4 @@
-from schemas import GateWayDTO, JobDTO
+from schemas import GateWayDTO
 from typing import Optional, Dict, Any
 
 
@@ -30,10 +30,7 @@ def wrap_response(
         success=success,
         errorMessage=error_message,
         responseBodyBatch=[
-            JobDTO(
-                id=1,
-                jobTitle=text
-            )
+            text
         ],
         job=job
     )
