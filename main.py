@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
 from utils import wrap_response
@@ -8,11 +9,18 @@ import shutil
 
 app = FastAPI()
 
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # или ["*"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
 
 @app.post("/transcribe")
 def transcribe(
@@ -63,7 +71,7 @@ def transcribe(
         if file_url or uploaded_file:
             os.remove(audio_path)
 
-        return wrap_response(text);
+        return wrap_response(text)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
