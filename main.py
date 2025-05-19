@@ -6,13 +6,19 @@ from utils import wrap_response
 from whisper_service import transcribe_audio
 from typing import Optional
 import shutil
+import uvicorn
 
 app = FastAPI()
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # или ["*"]
+    allow_origins=[
+        "https://localhost:5173",
+        "https://192.168.6.28:5173",  # Добавляем IP адрес
+        "http://localhost:5173",
+        "http://192.168.6.28:5173"    # Добавляем HTTP версию
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,3 +81,12 @@ def transcribe(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        ssl_keyfile="key.pem",
+        ssl_certfile="cert.pem"
+    )

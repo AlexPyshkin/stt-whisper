@@ -2,3 +2,4 @@ fastapi[all]
 uvicorn
 requests
 python-multipart
+pyOpenSSL

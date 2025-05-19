@@ -13,5 +13,12 @@ RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://pyp
 # Копируем проект
 COPY ../ /app/
 
-# Запускаем
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9099"]
+# Копируем SSL сертификаты
+COPY ../cert.pem /app/cert.pem
+COPY ../key.pem /app/key.pem
+
+# Открываем порт
+EXPOSE 9099
+
+# Запускаем с SSL
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9099", "--ssl-keyfile", "key.pem", "--ssl-certfile", "cert.pem"]
