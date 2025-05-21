@@ -21,4 +21,6 @@ COPY ../key.pem /app/key.pem
 EXPOSE 9099
 
 # Запускаем с SSL
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9099", "--ssl-keyfile", "key.pem", "--ssl-certfile", "cert.pem"]
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9099", "--ssl-keyfile", "key.pem", "--ssl-certfile", "cert.pem"]
+# Запускаем без SSL
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9099"]

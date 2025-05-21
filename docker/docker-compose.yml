@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  app:
+  whisper-api:
     image: "spbiffi/whisper-api:latest"
     container_name: "whisper-api"
     restart: on-failure
@@ -10,5 +10,11 @@ services:
     env_file:
       - .env
     volumes:
-      - /home/biffi/workspace/docker/volumes/whisper-api:/app/data  # если нужно монтировать папку с данными внутрь контейнера (можно убрать если не надо)
+      - "${DOCKER_VOLUMES}/whisper-api:/app/data"  # если нужно монтировать папку с данными внутрь контейнера (можно убрать если не надо)
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true
 

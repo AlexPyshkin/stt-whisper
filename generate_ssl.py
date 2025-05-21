@@ -19,6 +19,14 @@ def generate_self_signed_cert():
     cert.gmtime_adj_notAfter(365*24*60*60)  # Valid for one year
     cert.set_issuer(cert.get_subject())
     cert.set_pubkey(k)
+
+# Добавляем SAN
+    san_list = "DNS:localhost, DNS:whisper-api, IP:192.168.6.28, IP:127.0.0.1"
+    cert.add_extensions([
+        crypto.X509Extension(
+            b"subjectAltName", False, san_list.encode()
+        )
+    ])
     cert.sign(k, 'sha256')
 
     # Write certificate
