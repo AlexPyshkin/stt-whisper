@@ -13,12 +13,7 @@ app = FastAPI()
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://localhost:5173",
-        "https://192.168.6.28:5173",  # Добавляем IP адрес
-        "http://localhost:5173",
-        "http://192.168.6.28:5173"    # Добавляем HTTP версию
-    ],
+    allow_origins=["*"],  # Allow all origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
