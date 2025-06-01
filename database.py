@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
 # Database URL - you'll need to update this with your actual database credentials
-DATABASE_URL = "postgresql://developer:developer@localhost:5432/stt"
+DATABASE_URL = "postgresql://developer:developer@postgres:5432/stt"
 
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
