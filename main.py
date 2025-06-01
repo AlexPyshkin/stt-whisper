@@ -9,6 +9,15 @@ import shutil
 import uvicorn
 from sqlalchemy.orm import Session
 from database import get_db, WhisperRecord
+import traceback
+import logging
+
+# Настройка логирования
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -39,12 +48,17 @@ def transcribe(
     db: Session = Depends(get_db)
 ):
     try:
+        logger.info("Starting transcription process")
+        
         if file_path:
+            logger.info(f"Processing file from path: {file_path}")
             if not os.path.exists(file_path):
+                logger.error(f"File not found at path: {file_path}")
                 raise HTTPException(status_code=404, detail="Файл не найден по указанному пути")
             audio_path = file_path
 
         elif file_url:
+            logger.info(f"Processing file from URL: {file_url}")
             local_filename = "temp_audio_from_url"
             with requests.get(file_url, stream=True) as r:
                 r.raise_for_status()
@@ -54,49 +68,76 @@ def transcribe(
             audio_path = local_filename
 
         elif uploaded_file:
+            logger.info(f"Processing uploaded file: {uploaded_file.filename}")
             local_filename = f"temp_uploaded_{uploaded_file.filename}"
             with open(local_filename, "wb") as f:
                 shutil.copyfileobj(uploaded_file.file, f)
             audio_path = local_filename
 
         else:
+            logger.error("No file source provided")
             raise HTTPException(status_code=400, detail="Нужен либо file_path, либо file_url, либо файл")
 
         # Читаем аудиофайл в бинарном режиме
+        logger.info("Reading audio file")
         with open(audio_path, 'rb') as audio_file:
             audio_data = audio_file.read()
 
         # Создаем запись в базе данных
-        db_record = WhisperRecord(
-            audio_data=audio_data,
-            is_processed=False
-        )
-        db.add(db_record)
-        db.commit()
-        db.refresh(db_record)
+        logger.info("Creating database record")
+        try:
+            db_record = WhisperRecord(
+                audio_data=audio_data,
+                is_processed=False
+            )
+            db.add(db_record)
+            db.commit()
+            db.refresh(db_record)
+            logger.info(f"Database record created with ID: {db_record.id}")
+        except Exception as db_error:
+            logger.error(f"Database error: {str(db_error)}")
+            logger.error(traceback.format_exc())
+            raise
 
         # Транскрибируем аудио
-        text = transcribe_audio(
-            audio_path,
-            language=lang,
-            temperature=temperature,
-            beam_size=beam_size,
-            best_of=best_of,
-            patience=patience,
-            fp16=fp16
-        )
+        logger.info("Starting audio transcription")
+        try:
+            text = transcribe_audio(
+                audio_path,
+                language=lang,
+                temperature=temperature,
+                beam_size=beam_size,
+                best_of=best_of,
+                patience=patience,
+                fp16=fp16
+            )
+            logger.info("Transcription completed successfully")
+        except Exception as transcribe_error:
+            logger.error(f"Transcription error: {str(transcribe_error)}")
+            logger.error(traceback.format_exc())
+            raise
 
         # Обновляем запись в базе данных
-        db_record.transcribed_text = text
-        db_record.is_processed = False
-        db.commit()
+        logger.info("Updating database record with transcription")
+        try:
+            db_record.transcribed_text = text
+            db_record.is_processed = False
+            db.commit()
+            logger.info("Database record updated successfully")
+        except Exception as db_error:
+            logger.error(f"Database update error: {str(db_error)}")
+            logger.error(traceback.format_exc())
+            raise
 
         if file_url or uploaded_file:
+            logger.info("Cleaning up temporary file")
             os.remove(audio_path)
 
         return wrap_response(text)
 
     except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/transcriptions")
